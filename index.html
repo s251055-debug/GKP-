@@ -55,7 +55,13 @@ h2{font-size:15px;color:var(--muted);font-weight:600;margin:26px 0 12px;text-tra
 #soon h1{font-size:30px}
 #soon p{color:var(--muted);margin:12px auto 24px;max-width:460px;line-height:1.5}
 .install{display:none}
+.mail-shell{display:grid;grid-template-columns:190px minmax(0,1fr);gap:16px;margin-top:22px}
+.mail-nav,.mail-panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow)}
+.mail-nav{padding:12px}.mail-nav button{width:100%;margin:3px 0;text-align:left}.mail-compose{width:100%;margin-bottom:12px}
+.mail-panel{min-height:440px;overflow:hidden}.mail-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border)}
+.mail-toolbar h2{margin:0;color:var(--text);text-transform:none;letter-spacing:0;font-size:18px}.mail-list{list-style:none;padding:0}.mail-row{display:grid;grid-template-columns:minmax(110px,190px) minmax(0,1fr) auto;gap:12px;width:100%;border:0;border-bottom:1px solid var(--border);border-radius:0;background:var(--surface);color:var(--text);padding:14px 16px;text-align:left;font:inherit;cursor:pointer}.mail-row:hover,.mail-row:focus-visible{background:color-mix(in srgb,var(--brand) 7%,var(--surface));outline:none}.mail-row strong,.mail-row span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mail-row span{color:var(--muted)}.mail-row time{color:var(--muted);font-size:13px}.mail-empty,.mail-notice{color:var(--muted);padding:24px 16px}.mail-notice{color:var(--brand);padding-bottom:0}.mail-read,.mail-compose-form{padding:22px 20px}.mail-read h3{font-size:23px;margin-bottom:14px}.mail-meta{color:var(--muted);font-size:14px;margin-bottom:24px}.mail-body{white-space:pre-wrap;line-height:1.6}.mail-compose-form{display:grid;gap:14px}.mail-compose-form label{display:grid;gap:6px;font-size:14px;font-weight:600}.mail-compose-form input,.mail-compose-form textarea{border:1px solid var(--border);border-radius:10px;padding:10px 12px;background:var(--bg);color:var(--text);font:inherit}.mail-compose-form textarea{min-height:180px;resize:vertical}.mail-actions{display:flex;gap:8px;justify-content:flex-end}
 footer{text-align:center;color:var(--muted);font-size:13px;padding:24px}
+@media (max-width:640px){.mail-shell{grid-template-columns:1fr}.mail-nav{display:flex;gap:8px;align-items:center;overflow:auto}.mail-nav .mail-compose{width:auto;margin:0;white-space:nowrap}.mail-nav button:not(.mail-compose){width:auto;white-space:nowrap}.mail-row{grid-template-columns:minmax(80px,110px) minmax(0,1fr)}.mail-row time{display:none}}
 @media (max-width:520px){ .hide-s{display:none} }
 </style>
 </head>
@@ -91,6 +97,25 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px}
     <p><span class="badge" id="soonBadge" style="--c:var(--brand)" data-i18n="soon">Σύντομα διαθέσιμο</span></p>
     <button class="btn primary" id="back" data-i18n="back">← Πίσω στο GKP Home</button>
   </section>
+
+  <section id="kmailView" hidden>
+    <div class="hero">
+      <h1>KMAIL</h1>
+      <p id="mailIntro">Το προσωπικό σου γραμματοκιβώτιο.</p>
+    </div>
+    <div class="mail-shell">
+      <nav class="mail-nav" aria-label="KMAIL folders">
+        <button class="btn primary mail-compose" id="mailCompose">+ <span data-mail-text="compose">Νέο μήνυμα</span></button>
+        <button class="btn" data-folder="inbox"><span data-mail-text="inbox">Εισερχόμενα</span></button>
+        <button class="btn" data-folder="sent"><span data-mail-text="sent">Απεσταλμένα</span></button>
+      </nav>
+      <div class="mail-panel">
+        <div class="mail-toolbar"><h2 id="mailTitle">Εισερχόμενα</h2><button class="btn" id="mailBack" hidden>← <span data-mail-text="back">Πίσω</span></button></div>
+        <p class="mail-notice" id="mailNotice" hidden></p>
+        <div id="mailContent"></div>
+      </div>
+    </div>
+  </section>
 </main>
 <footer>© GKP — Your Digital World</footer>
 
@@ -99,7 +124,7 @@ const APPS=[
  {id:"talkapp",name:"TALKAPP",ic:"💬",c:"#6264a7",el:"Συνομιλίες, ομάδες και βιντεοκλήσεις.",en:"Chats, teams and video calls."},
  {id:"quizapp",name:"QUIZAPP",ic:"📋",c:"#0f9d58",el:"Φόρμες, ερωτηματολόγια και τεστ.",en:"Forms, surveys and quizzes."},
  {id:"saveplace",name:"SAVEPLACE",ic:"📁",c:"#0078d4",el:"Αποθήκευση και κοινή χρήση αρχείων.",en:"File storage and sharing."},
- {id:"kmail",name:"KMAIL",ic:"✉️",c:"#d9480f",el:"Ηλεκτρονικό ταχυδρομείο.",en:"Email."},
+ {id:"kmail",name:"KMAIL",ic:"✉️",c:"#d9480f",el:"Ηλεκτρονικό ταχυδρομείο.",en:"Email.",active:true},
  {id:"documents",name:"DOCUMENTS",ic:"📝",c:"#2b579a",el:"Δημιουργία και επεξεργασία εγγράφων.",en:"Create and edit documents."},
  {id:"sheets",name:"SHEETS",ic:"📊",c:"#217346",el:"Υπολογιστικά φύλλα.",en:"Spreadsheets."},
  {id:"presentations",name:"PRESENTATIONS",ic:"📽️",c:"#c43e1c",el:"Δημιουργία παρουσιάσεων.",en:"Create presentations."},
@@ -112,8 +137,36 @@ const T={
 const $=s=>document.querySelector(s);
 let lang=load("gkp-lang")||((navigator.language||"el").startsWith("el")?"el":"en");
 let theme=load("gkp-theme")||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");
+let mailFolder="inbox",mailMode="list",selectedMail=null;
+const MAIL_KEY="gkp-kmail-v1";
+const MAIL_TEXT={el:{intro:"Το προσωπικό σου γραμματοκιβώτιο.",compose:"Νέο μήνυμα",inbox:"Εισερχόμενα",sent:"Απεσταλμένα",back:"Πίσω",empty:"Δεν υπάρχουν μηνύματα εδώ.",to:"Προς",subject:"Θέμα",message:"Μήνυμα",send:"Αποστολή",cancel:"Ακύρωση",sentNotice:"Το μήνυμα αποθηκεύτηκε στα Απεσταλμένα.",from:"Από"},en:{intro:"Your personal mailbox.",compose:"New message",inbox:"Inbox",sent:"Sent",back:"Back",empty:"There are no messages here.",to:"To",subject:"Subject",message:"Message",send:"Send",cancel:"Cancel",sentNotice:"Message saved in Sent.",from:"From"}};
+const INITIAL_MAIL=[{id:"welcome",folder:"inbox",from:"GKP Team",to:"you@gkp.local",subject:"Καλώς ήρθες στο KMAIL",body:"Το KMAIL είναι έτοιμο για χρήση. Μπορείς να διαβάσεις και να συντάξεις μηνύματα από εδώ.",date:"2026-10-29T09:00:00.000Z"},{id:"tips",folder:"inbox",from:"GKP Support",to:"you@gkp.local",subject:"Ξεκίνα με το νέο σου γραμματοκιβώτιο",body:"Χρησιμοποίησε το κουμπί «Νέο μήνυμα» για να συντάξεις ένα email.",date:"2026-10-28T09:00:00.000Z"}];
 function load(k){try{return localStorage.getItem(k)}catch(e){return null}}
 function save(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+function mail(){try{const saved=JSON.parse(load(MAIL_KEY));return Array.isArray(saved)?saved:INITIAL_MAIL}catch(e){return INITIAL_MAIL}}
+function saveMail(items){save(MAIL_KEY,JSON.stringify(items))}
+function esc(v){return String(v).replace(/[&<>\"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]))}
+function dateLabel(value){return new Intl.DateTimeFormat(lang,{day:"numeric",month:"short"}).format(new Date(value))}
+function renderMailbox(){
+  const text=MAIL_TEXT[lang],content=$("#mailContent"),back=$("#mailBack"),notice=$("#mailNotice");
+  $("#mailIntro").textContent=text.intro;
+  document.querySelectorAll("[data-mail-text]").forEach(e=>e.textContent=text[e.dataset.mailText]);
+  $("#mailTitle").textContent=mailMode==="compose"?text.compose:(mailMode==="read"?"KMAIL":text[mailFolder]);
+  back.hidden=mailMode==="list"; notice.hidden=true;
+  if(mailMode==="compose"){
+    content.innerHTML=`<form class="mail-compose-form" id="mailForm"><label>${text.to}<input name="to" type="email" required placeholder="name@example.com"></label><label>${text.subject}<input name="subject" required></label><label>${text.message}<textarea name="body" required></textarea></label><div class="mail-actions"><button class="btn" type="button" id="mailCancel">${text.cancel}</button><button class="btn primary" type="submit">${text.send}</button></div></form>`;
+    return;
+  }
+  const messages=mail();
+  if(mailMode==="read"){
+    const item=messages.find(m=>m.id===selectedMail);
+    if(!item){mailMode="list";return renderMailbox()}
+    content.innerHTML=`<article class="mail-read"><h3>${esc(item.subject)}</h3><p class="mail-meta"><b>${item.folder==="sent"?text.to:text.from}:</b> ${esc(item.folder==="sent"?item.to:item.from)}<br>${dateLabel(item.date)}</p><div class="mail-body">${esc(item.body)}</div></article>`;
+    return;
+  }
+  const filtered=messages.filter(m=>m.folder===mailFolder).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  content.innerHTML=filtered.length?`<ul class="mail-list">${filtered.map(m=>`<li><button class="mail-row" data-mail-id="${esc(m.id)}"><strong>${esc(m.folder==="sent"?m.to:m.from)}</strong><span>${esc(m.subject)}</span><time datetime="${esc(m.date)}">${dateLabel(m.date)}</time></button></li>`).join("")}</ul>`:`<p class="mail-empty">${text.empty}</p>`;
+}
 
 function render(){
   document.documentElement.lang=lang;
@@ -126,15 +179,18 @@ function render(){
   const list=APPS.filter(a=>!q||a.name.toLowerCase().includes(q)||a[lang].toLowerCase().includes(q));
   $("#grid").innerHTML=list.map(a=>`<button class="card" style="--c:${a.c}" data-id="${a.id}">
     <div class="icon" aria-hidden="true">${a.ic}</div><b>${a.name}</b><span class="d">${a[lang]}</span>
-    <span class="badge">${T[lang].soon}</span></button>`).join("");
+    <span class="badge">${a.active?T[lang].open:T[lang].soon}</span></button>`).join("");
   $("#empty").style.display=list.length?"none":"block";
   route();
 }
 function route(){
   const id=location.hash.slice(1);
   const a=APPS.find(x=>x.id===id);
+  const isMail=id==="kmail";
   $("#homeView").style.display=a?"none":"block";
-  $("#soon").style.display=a?"block":"none";
+  $("#soon").style.display=a&&!isMail?"block":"none";
+  $("#kmailView").hidden=!isMail;
+  if(isMail){document.title="KMAIL — GKP";renderMailbox();return}
   if(a){
     $("#soonIcon").style.setProperty("--c",a.c);$("#soonIcon").textContent=a.ic;
     $("#soonName").textContent=a.name;
@@ -147,6 +203,26 @@ $("#home").onclick=$("#back").onclick=()=>{location.hash="";scrollTo(0,0)};
 $("#q").oninput=render;
 $("#lang").onclick=()=>{lang=lang==="el"?"en":"el";save("gkp-lang",lang);render()};
 $("#theme").onclick=()=>{theme=theme==="dark"?"light":"dark";save("gkp-theme",theme);render()};
+$("#mailCompose").onclick=()=>{mailMode="compose";renderMailbox()};
+$("#mailBack").onclick=()=>{mailMode="list";renderMailbox()};
+document.querySelector(".mail-nav").addEventListener("click",e=>{
+  const folder=e.target.closest("[data-folder]");
+  if(!folder)return;
+  mailFolder=folder.dataset.folder;mailMode="list";renderMailbox();
+});
+$("#mailContent").addEventListener("click",e=>{
+  const row=e.target.closest("[data-mail-id]");
+  if(row){selectedMail=row.dataset.mailId;mailMode="read";renderMailbox();return}
+  if(e.target.closest("#mailCancel")){mailMode="list";renderMailbox()}
+});
+$("#mailContent").addEventListener("submit",e=>{
+  if(e.target.id!=="mailForm")return;
+  e.preventDefault();
+  const form=new FormData(e.target),items=mail();
+  items.push({id:`sent-${Date.now()}`,folder:"sent",from:"you@gkp.local",to:form.get("to").trim(),subject:form.get("subject").trim(),body:form.get("body").trim(),date:new Date().toISOString()});
+  saveMail(items);mailFolder="sent";mailMode="list";renderMailbox();
+  const notice=$("#mailNotice");notice.textContent=MAIL_TEXT[lang].sentNotice;notice.hidden=false;
+});
 addEventListener("hashchange",route);
 
 // PWA install
