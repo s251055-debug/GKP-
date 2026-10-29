@@ -1,0 +1,17 @@
+{
+  "name": "GKP — Your Digital World",
+  "short_name": "GKP",
+  "description": "Το ψηφιακό οικοσύστημα GKP: TALKAPP, QUIZAPP, SAVEPLACE, KMAIL, DOCUMENTS, SHEETS, PRESENTATIONS, KDAYS.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f3f6fc",
+  "theme_color": "#1d4ed8",
+  "lang": "el",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

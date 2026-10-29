@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GKP — Your Digital World</title>
+<meta name="description" content="GKP: το ψηφιακό σου οικοσύστημα.">
+<meta name="theme-color" content="#1d4ed8">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="GKP">
+<style>
+:root{
+  --bg:#f3f6fc; --surface:#ffffff; --text:#0f172a; --muted:#5b6578; --border:#e2e8f0;
+  --brand:#1d4ed8; --shadow:0 1px 2px rgba(15,23,42,.06),0 8px 24px rgba(15,23,42,.06);
+}
+:root[data-theme="dark"]{
+  --bg:#0b1220; --surface:#131c2f; --text:#e8eefc; --muted:#9aa7c2; --border:#25314d;
+  --brand:#6ea0ff; --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box;margin:0}
+body{font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;
+  padding-bottom:env(safe-area-inset-bottom)}
+header{position:sticky;top:0;z-index:10;background:var(--surface);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;padding:12px max(16px,env(safe-area-inset-left));}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:20px;letter-spacing:.5px;cursor:pointer;background:none;border:0;color:var(--text)}
+.logo svg{width:32px;height:32px}
+.spacer{flex:1}
+.btn{border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:10px;padding:8px 12px;font:inherit;font-size:14px;cursor:pointer}
+.btn:hover{border-color:var(--brand)}
+.btn.primary{background:var(--brand);color:#fff;border-color:var(--brand)}
+:root[data-theme="dark"] .btn.primary{color:#0b1220}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px}
+:root[data-theme="dark"] .avatar{color:#0b1220}
+main{max-width:1000px;margin:0 auto;padding:28px 16px 48px}
+.hero h1{font-size:clamp(26px,5vw,38px);line-height:1.15}
+.hero p{color:var(--muted);margin-top:8px;font-size:17px}
+.search{margin:22px 0 8px;width:100%;padding:13px 16px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--text);font:inherit;font-size:16px}
+.search:focus{outline:2px solid var(--brand);border-color:transparent}
+h2{font-size:15px;color:var(--muted);font-weight:600;margin:26px 0 12px;text-transform:uppercase;letter-spacing:.06em}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:var(--shadow);
+  text-align:left;color:inherit;font:inherit;cursor:pointer;display:flex;flex-direction:column;gap:10px;transition:transform .15s,border-color .15s}
+.card:hover,.card:focus-visible{transform:translateY(-3px);border-color:var(--c);outline:none}
+.icon{width:48px;height:48px;border-radius:13px;background:var(--c);color:#fff;display:grid;place-items:center;font-size:24px}
+.card b{font-size:17px}
+.card span.d{color:var(--muted);font-size:14px;line-height:1.4}
+.badge{align-self:flex-start;font-size:11px;font-weight:600;padding:3px 8px;border-radius:99px;background:color-mix(in srgb,var(--c) 15%,transparent);color:var(--c)}
+:root[data-theme="dark"] .badge{color:color-mix(in srgb,var(--c) 70%,white)}
+.empty{color:var(--muted);padding:20px 0;display:none}
+/* coming soon view */
+#soon{display:none;text-align:center;padding:60px 10px}
+#soon .icon{width:84px;height:84px;font-size:42px;margin:0 auto 20px;border-radius:24px}
+#soon h1{font-size:30px}
+#soon p{color:var(--muted);margin:12px auto 24px;max-width:460px;line-height:1.5}
+.install{display:none}
+footer{text-align:center;color:var(--muted);font-size:13px;padding:24px}
+@media (max-width:520px){ .hide-s{display:none} }
+</style>
+</head>
+<body>
+<header>
+  <button class="logo" id="home" aria-label="GKP Home">
+    <svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="16" fill="#1d4ed8"/><text x="32" y="41" text-anchor="middle" font-family="Segoe UI,Arial" font-weight="800" font-size="24" fill="#fff">GKP</text></svg>
+    <span class="hide-s">GKP</span>
+  </button>
+  <div class="spacer"></div>
+  <button class="btn install primary" id="installBtn" data-i18n="install">Εγκατάσταση</button>
+  <button class="btn" id="lang" aria-label="Language">EN</button>
+  <button class="btn" id="theme" aria-label="Theme">🌙</button>
+  <div class="avatar" title="GKP Account">G</div>
+</header>
+
+<main>
+  <section id="homeView">
+    <div class="hero">
+      <h1 data-i18n="title">Καλώς ήρθες στη GKP</h1>
+      <p data-i18n="sub">Το ψηφιακό σου οικοσύστημα: ένας λογαριασμός, όλες οι εφαρμογές.</p>
+    </div>
+    <input class="search" id="q" type="search" data-i18n-ph="search" placeholder="Αναζήτηση εφαρμογής...">
+    <h2 data-i18n="apps">Οι εφαρμογές σου</h2>
+    <div class="grid" id="grid"></div>
+    <p class="empty" id="empty" data-i18n="none">Δεν βρέθηκε εφαρμογή.</p>
+  </section>
+
+  <section id="soon">
+    <div class="icon" id="soonIcon"></div>
+    <h1 id="soonName"></h1>
+    <p id="soonDesc"></p>
+    <p><span class="badge" id="soonBadge" style="--c:var(--brand)" data-i18n="soon">Σύντομα διαθέσιμο</span></p>
+    <button class="btn primary" id="back" data-i18n="back">← Πίσω στο GKP Home</button>
+  </section>
+</main>
+<footer>© GKP — Your Digital World</footer>
+
+<script>
+const APPS=[
+ {id:"talkapp",name:"TALKAPP",ic:"💬",c:"#6264a7",el:"Συνομιλίες, ομάδες και βιντεοκλήσεις.",en:"Chats, teams and video calls."},
+ {id:"quizapp",name:"QUIZAPP",ic:"📋",c:"#0f9d58",el:"Φόρμες, ερωτηματολόγια και τεστ.",en:"Forms, surveys and quizzes."},
+ {id:"saveplace",name:"SAVEPLACE",ic:"📁",c:"#0078d4",el:"Αποθήκευση και κοινή χρήση αρχείων.",en:"File storage and sharing."},
+ {id:"kmail",name:"KMAIL",ic:"✉️",c:"#d9480f",el:"Ηλεκτρονικό ταχυδρομείο.",en:"Email."},
+ {id:"documents",name:"DOCUMENTS",ic:"📝",c:"#2b579a",el:"Δημιουργία και επεξεργασία εγγράφων.",en:"Create and edit documents."},
+ {id:"sheets",name:"SHEETS",ic:"📊",c:"#217346",el:"Υπολογιστικά φύλλα.",en:"Spreadsheets."},
+ {id:"presentations",name:"PRESENTATIONS",ic:"📽️",c:"#c43e1c",el:"Δημιουργία παρουσιάσεων.",en:"Create presentations."},
+ {id:"kdays",name:"KDAYS",ic:"📅",c:"#8e24aa",el:"Ημερολόγιο, εκδηλώσεις και υπενθυμίσεις.",en:"Calendar, events and reminders."}
+];
+const T={
+ el:{title:"Καλώς ήρθες στη GKP",sub:"Το ψηφιακό σου οικοσύστημα: ένας λογαριασμός, όλες οι εφαρμογές.",search:"Αναζήτηση εφαρμογής...",apps:"Οι εφαρμογές σου",none:"Δεν βρέθηκε εφαρμογή.",soon:"Σύντομα διαθέσιμο",back:"← Πίσω στο GKP Home",install:"Εγκατάσταση",open:"Άνοιγμα",soonDesc:"Αυτή η εφαρμογή βρίσκεται υπό κατασκευή και θα είναι διαθέσιμη σύντομα."},
+ en:{title:"Welcome to GKP",sub:"Your digital ecosystem: one account, all your apps.",search:"Search apps...",apps:"Your apps",none:"No app found.",soon:"Coming soon",back:"← Back to GKP Home",install:"Install",open:"Open",soonDesc:"This app is under construction and will be available soon."}
+};
+const $=s=>document.querySelector(s);
+let lang=load("gkp-lang")||((navigator.language||"el").startsWith("el")?"el":"en");
+let theme=load("gkp-theme")||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");
+function load(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function save(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+
+function render(){
+  document.documentElement.lang=lang;
+  document.documentElement.dataset.theme=theme;
+  $("#lang").textContent=lang==="el"?"EN":"ΕΛ";
+  $("#theme").textContent=theme==="dark"?"☀️":"🌙";
+  document.querySelectorAll("[data-i18n]").forEach(e=>e.textContent=T[lang][e.dataset.i18n]);
+  document.querySelectorAll("[data-i18n-ph]").forEach(e=>e.placeholder=T[lang][e.dataset.i18nPh]);
+  const q=$("#q").value.trim().toLowerCase();
+  const list=APPS.filter(a=>!q||a.name.toLowerCase().includes(q)||a[lang].toLowerCase().includes(q));
+  $("#grid").innerHTML=list.map(a=>`<button class="card" style="--c:${a.c}" data-id="${a.id}">
+    <div class="icon" aria-hidden="true">${a.ic}</div><b>${a.name}</b><span class="d">${a[lang]}</span>
+    <span class="badge">${T[lang].soon}</span></button>`).join("");
+  $("#empty").style.display=list.length?"none":"block";
+  route();
+}
+function route(){
+  const id=location.hash.slice(1);
+  const a=APPS.find(x=>x.id===id);
+  $("#homeView").style.display=a?"none":"block";
+  $("#soon").style.display=a?"block":"none";
+  if(a){
+    $("#soonIcon").style.setProperty("--c",a.c);$("#soonIcon").textContent=a.ic;
+    $("#soonName").textContent=a.name;
+    $("#soonDesc").textContent=a[lang]+" "+T[lang].soonDesc;
+    document.title=a.name+" — GKP";
+  } else document.title="GKP — Your Digital World";
+}
+$("#grid").addEventListener("click",e=>{const c=e.target.closest(".card");if(c)location.hash=c.dataset.id});
+$("#home").onclick=$("#back").onclick=()=>{location.hash="";scrollTo(0,0)};
+$("#q").oninput=render;
+$("#lang").onclick=()=>{lang=lang==="el"?"en":"el";save("gkp-lang",lang);render()};
+$("#theme").onclick=()=>{theme=theme==="dark"?"light":"dark";save("gkp-theme",theme);render()};
+addEventListener("hashchange",route);
+
+// PWA install
+let deferred;
+addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferred=e;$("#installBtn").style.display="inline-block"});
+$("#installBtn").onclick=async()=>{if(!deferred)return;deferred.prompt();await deferred.userChoice;deferred=null;$("#installBtn").style.display="none"};
+addEventListener("appinstalled",()=>{$("#installBtn").style.display="none"});
+if("serviceWorker" in navigator && location.protocol.startsWith("http")){
+  addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+}
+render();
+</script>
+</body>
+</html>
