@@ -60,6 +60,7 @@ h2{font-size:15px;color:var(--muted);font-weight:600;margin:26px 0 12px;text-tra
 .mail-nav{padding:12px}.mail-nav button{width:100%;margin:3px 0;text-align:left}.mail-compose{width:100%;margin-bottom:12px}
 .mail-panel{min-height:440px;overflow:hidden}.mail-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border)}
 .mail-toolbar h2{margin:0;color:var(--text);text-transform:none;letter-spacing:0;font-size:18px}.mail-list{list-style:none;padding:0}.mail-row{display:grid;grid-template-columns:minmax(110px,190px) minmax(0,1fr) auto;gap:12px;width:100%;border:0;border-bottom:1px solid var(--border);border-radius:0;background:var(--surface);color:var(--text);padding:14px 16px;text-align:left;font:inherit;cursor:pointer}.mail-row:hover,.mail-row:focus-visible{background:color-mix(in srgb,var(--brand) 7%,var(--surface));outline:none}.mail-row strong,.mail-row span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mail-row span{color:var(--muted)}.mail-row time{color:var(--muted);font-size:13px}.mail-empty,.mail-notice{color:var(--muted);padding:24px 16px}.mail-notice{color:var(--brand);padding-bottom:0}.mail-read,.mail-compose-form{padding:22px 20px}.mail-read h3{font-size:23px;margin-bottom:14px}.mail-meta{color:var(--muted);font-size:14px;margin-bottom:24px}.mail-body{white-space:pre-wrap;line-height:1.6}.mail-compose-form{display:grid;gap:14px}.mail-compose-form label{display:grid;gap:6px;font-size:14px;font-weight:600}.mail-compose-form input,.mail-compose-form textarea{border:1px solid var(--border);border-radius:10px;padding:10px 12px;background:var(--bg);color:var(--text);font:inherit}.mail-compose-form textarea{min-height:180px;resize:vertical}.mail-actions{display:flex;gap:8px;justify-content:flex-end}
+.auth-card{max-width:460px;margin:36px auto;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px;box-shadow:var(--shadow)}.auth-card h1{font-size:28px}.auth-card p{color:var(--muted);margin:8px 0 22px;line-height:1.5}.auth-tabs{display:flex;gap:8px;margin-bottom:18px}.auth-tabs .btn{flex:1}.auth-form{display:grid;gap:14px}.auth-form label{display:grid;gap:6px;font-size:14px;font-weight:600}.auth-form input{border:1px solid var(--border);border-radius:10px;padding:11px 12px;background:var(--bg);color:var(--text);font:inherit}.auth-form .btn{margin-top:4px}.auth-error{color:#b42318;font-size:14px;min-height:20px}.account-email{font-size:13px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 footer{text-align:center;color:var(--muted);font-size:13px;padding:24px}
 @media (max-width:640px){.mail-shell{grid-template-columns:1fr}.mail-nav{display:flex;gap:8px;align-items:center;overflow:auto}.mail-nav .mail-compose{width:auto;margin:0;white-space:nowrap}.mail-nav button:not(.mail-compose){width:auto;white-space:nowrap}.mail-row{grid-template-columns:minmax(80px,110px) minmax(0,1fr)}.mail-row time{display:none}}
 @media (max-width:520px){ .hide-s{display:none} }
@@ -75,13 +76,27 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px}
   <button class="btn install primary" id="installBtn" data-i18n="install">Εγκατάσταση</button>
   <button class="btn" id="lang" aria-label="Language">EN</button>
   <button class="btn" id="theme" aria-label="Theme">🌙</button>
-  <div class="avatar" title="GKP Account">G</div>
+  <button class="btn account-email" id="account" hidden></button>
+  <button class="btn" id="signOut" hidden data-auth-text="signOut">Έξοδος</button>
+  <div class="avatar" id="avatar" title="GKP Account" hidden>G</div>
 </header>
 
 <main>
+  <section id="authView" hidden>
+    <div class="auth-card">
+      <h1 id="authTitle">Σύνδεση στο GKP</h1>
+      <p id="authIntro">Χρησιμοποίησε τον λογαριασμό σου για πρόσβαση στις εφαρμογές GKP.</p>
+      <div class="auth-tabs" role="tablist">
+        <button class="btn" id="loginTab" type="button" data-auth-text="login">Σύνδεση</button>
+        <button class="btn" id="registerTab" type="button" data-auth-text="register">Δημιουργία λογαριασμού</button>
+      </div>
+      <form class="auth-form" id="authForm"></form>
+      <p class="auth-error" id="authError" role="alert"></p>
+    </div>
+  </section>
   <section id="homeView">
     <div class="hero">
-      <h1 data-i18n="title">Καλώς ήρθες στη GKP</h1>
+      <h1 id="welcomeTitle" data-i18n="title">Καλώς ήρθες στη GKP</h1>
       <p data-i18n="sub">Το ψηφιακό σου οικοσύστημα: ένας λογαριασμός, όλες οι εφαρμογές.</p>
     </div>
     <input class="search" id="q" type="search" data-i18n-ph="search" placeholder="Αναζήτηση εφαρμογής...">
@@ -138,15 +153,35 @@ const $=s=>document.querySelector(s);
 let lang=load("gkp-lang")||((navigator.language||"el").startsWith("el")?"el":"en");
 let theme=load("gkp-theme")||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");
 let mailFolder="inbox",mailMode="list",selectedMail=null;
-const MAIL_KEY="gkp-kmail-v1";
+let authMode="login";
+const USERS_KEY="gkp-users-v1",SESSION_KEY="gkp-session-v1";
+const AUTH_TEXT={el:{login:"Σύνδεση",register:"Δημιουργία λογαριασμού",signOut:"Έξοδος",loginTitle:"Σύνδεση στο GKP",registerTitle:"Δημιούργησε λογαριασμό",loginIntro:"Χρησιμοποίησε τον λογαριασμό σου για πρόσβαση στις εφαρμογές GKP.",registerIntro:"Ένας λογαριασμός για όλες τις εφαρμογές GKP.",name:"Ονοματεπώνυμο",email:"Email",password:"Κωδικός",loginAction:"Σύνδεση",registerAction:"Δημιουργία λογαριασμού",required:"Συμπλήρωσε όλα τα πεδία.",shortPassword:"Ο κωδικός χρειάζεται τουλάχιστον 8 χαρακτήρες.",exists:"Υπάρχει ήδη λογαριασμός με αυτό το email.",invalid:"Λάθος email ή κωδικός.",welcome:"Καλώς ήρθες"},en:{login:"Sign in",register:"Create account",signOut:"Sign out",loginTitle:"Sign in to GKP",registerTitle:"Create an account",loginIntro:"Use your account to access GKP applications.",registerIntro:"One account for every GKP application.",name:"Full name",email:"Email",password:"Password",loginAction:"Sign in",registerAction:"Create account",required:"Complete all fields.",shortPassword:"Password must contain at least 8 characters.",exists:"An account with this email already exists.",invalid:"Incorrect email or password.",welcome:"Welcome"}};
 const MAIL_TEXT={el:{intro:"Το προσωπικό σου γραμματοκιβώτιο.",compose:"Νέο μήνυμα",inbox:"Εισερχόμενα",sent:"Απεσταλμένα",back:"Πίσω",empty:"Δεν υπάρχουν μηνύματα εδώ.",to:"Προς",subject:"Θέμα",message:"Μήνυμα",send:"Αποστολή",cancel:"Ακύρωση",sentNotice:"Το μήνυμα αποθηκεύτηκε στα Απεσταλμένα.",from:"Από"},en:{intro:"Your personal mailbox.",compose:"New message",inbox:"Inbox",sent:"Sent",back:"Back",empty:"There are no messages here.",to:"To",subject:"Subject",message:"Message",send:"Send",cancel:"Cancel",sentNotice:"Message saved in Sent.",from:"From"}};
 const INITIAL_MAIL=[{id:"welcome",folder:"inbox",from:"GKP Team",to:"you@gkp.local",subject:"Καλώς ήρθες στο KMAIL",body:"Το KMAIL είναι έτοιμο για χρήση. Μπορείς να διαβάσεις και να συντάξεις μηνύματα από εδώ.",date:"2026-10-29T09:00:00.000Z"},{id:"tips",folder:"inbox",from:"GKP Support",to:"you@gkp.local",subject:"Ξεκίνα με το νέο σου γραμματοκιβώτιο",body:"Χρησιμοποίησε το κουμπί «Νέο μήνυμα» για να συντάξεις ένα email.",date:"2026-10-28T09:00:00.000Z"}];
 function load(k){try{return localStorage.getItem(k)}catch(e){return null}}
 function save(k,v){try{localStorage.setItem(k,v)}catch(e){}}
-function mail(){try{const saved=JSON.parse(load(MAIL_KEY));return Array.isArray(saved)?saved:INITIAL_MAIL}catch(e){return INITIAL_MAIL}}
-function saveMail(items){save(MAIL_KEY,JSON.stringify(items))}
+function users(){try{const saved=JSON.parse(load(USERS_KEY));return Array.isArray(saved)?saved:[]}catch(e){return []}}
+function saveUsers(items){save(USERS_KEY,JSON.stringify(items))}
+function currentUser(){const email=load(SESSION_KEY);return users().find(u=>u.email===email)||null}
+function mailboxKey(){const user=currentUser();return `gkp-kmail-v1:${user?user.email:"guest"}`}
+function mail(){try{const saved=JSON.parse(load(mailboxKey()));return Array.isArray(saved)?saved:INITIAL_MAIL.map(item=>({...item,to:currentUser()?.email||item.to}))}catch(e){return INITIAL_MAIL}}
+function saveMail(items){save(mailboxKey(),JSON.stringify(items))}
 function esc(v){return String(v).replace(/[&<>\"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]))}
 function dateLabel(value){return new Intl.DateTimeFormat(lang,{day:"numeric",month:"short"}).format(new Date(value))}
+function renderAuth(){
+  const text=AUTH_TEXT[lang],registering=authMode==="register",form=$("#authForm");
+  document.querySelectorAll("[data-auth-text]").forEach(e=>e.textContent=text[e.dataset.authText]);
+  $("#authTitle").textContent=registering?text.registerTitle:text.loginTitle;
+  $("#authIntro").textContent=registering?text.registerIntro:text.loginIntro;
+  $("#loginTab").classList.toggle("primary",!registering);$("#registerTab").classList.toggle("primary",registering);
+  form.innerHTML=`${registering?`<label>${text.name}<input name="name" autocomplete="name" required></label>`:""}<label>${text.email}<input name="email" type="email" autocomplete="email" required></label><label>${text.password}<input name="password" type="password" autocomplete="${registering?"new-password":"current-password"}" minlength="8" required></label><button class="btn primary" type="submit">${registering?text.registerAction:text.loginAction}</button>`;
+  $("#authError").textContent="";
+}
+function renderAccount(){
+  const user=currentUser();
+  $("#account").hidden=!user;$("#signOut").hidden=!user;$("#avatar").hidden=!user;
+  if(user){$("#account").textContent=user.email;$("#avatar").textContent=(user.name||user.email).trim().slice(0,1).toUpperCase()}
+}
 function renderMailbox(){
   const text=MAIL_TEXT[lang],content=$("#mailContent"),back=$("#mailBack"),notice=$("#mailNotice");
   $("#mailIntro").textContent=text.intro;
@@ -171,6 +206,7 @@ function renderMailbox(){
 function render(){
   document.documentElement.lang=lang;
   document.documentElement.dataset.theme=theme;
+  renderAccount();
   $("#lang").textContent=lang==="el"?"EN":"ΕΛ";
   $("#theme").textContent=theme==="dark"?"☀️":"🌙";
   document.querySelectorAll("[data-i18n]").forEach(e=>e.textContent=T[lang][e.dataset.i18n]);
@@ -184,6 +220,13 @@ function render(){
   route();
 }
 function route(){
+  const user=currentUser();
+  $("#authView").hidden=!!user;
+  if(!user){
+    $("#homeView").style.display="none";$("#soon").style.display="none";$("#kmailView").hidden=true;
+    document.title="GKP — Your Digital World";renderAuth();return;
+  }
+  $("#welcomeTitle").textContent=`${AUTH_TEXT[lang].welcome}, ${user.name}`;
   const id=location.hash.slice(1);
   const a=APPS.find(x=>x.id===id);
   const isMail=id==="kmail";
@@ -203,6 +246,21 @@ $("#home").onclick=$("#back").onclick=()=>{location.hash="";scrollTo(0,0)};
 $("#q").oninput=render;
 $("#lang").onclick=()=>{lang=lang==="el"?"en":"el";save("gkp-lang",lang);render()};
 $("#theme").onclick=()=>{theme=theme==="dark"?"light":"dark";save("gkp-theme",theme);render()};
+$("#loginTab").onclick=()=>{authMode="login";renderAuth()};
+$("#registerTab").onclick=()=>{authMode="register";renderAuth()};
+$("#authForm").addEventListener("submit",e=>{
+  e.preventDefault();const text=AUTH_TEXT[lang],data=new FormData(e.target),email=data.get("email").trim().toLowerCase(),password=data.get("password");
+  if(!email||!password||(authMode==="register"&&!data.get("name").trim())){$("#authError").textContent=text.required;return}
+  if(authMode==="register"){
+    if(password.length<8){$("#authError").textContent=text.shortPassword;return}
+    const items=users();if(items.some(u=>u.email===email)){$("#authError").textContent=text.exists;return}
+    items.push({name:data.get("name").trim(),email,password});saveUsers(items);save(SESSION_KEY,email);
+  }else{
+    const user=users().find(u=>u.email===email&&u.password===password);if(!user){$("#authError").textContent=text.invalid;return}save(SESSION_KEY,email);
+  }
+  mailMode="list";render();
+});
+$("#signOut").onclick=()=>{save(SESSION_KEY,"");location.hash="";render()};
 $("#mailCompose").onclick=()=>{mailMode="compose";renderMailbox()};
 $("#mailBack").onclick=()=>{mailMode="list";renderMailbox()};
 document.querySelector(".mail-nav").addEventListener("click",e=>{
@@ -219,7 +277,7 @@ $("#mailContent").addEventListener("submit",e=>{
   if(e.target.id!=="mailForm")return;
   e.preventDefault();
   const form=new FormData(e.target),items=mail();
-  items.push({id:`sent-${Date.now()}`,folder:"sent",from:"you@gkp.local",to:form.get("to").trim(),subject:form.get("subject").trim(),body:form.get("body").trim(),date:new Date().toISOString()});
+  items.push({id:`sent-${Date.now()}`,folder:"sent",from:currentUser().email,to:form.get("to").trim(),subject:form.get("subject").trim(),body:form.get("body").trim(),date:new Date().toISOString()});
   saveMail(items);mailFolder="sent";mailMode="list";renderMailbox();
   const notice=$("#mailNotice");notice.textContent=MAIL_TEXT[lang].sentNotice;notice.hidden=false;
 });

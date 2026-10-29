@@ -1,4 +1,4 @@
-const CACHE = "gkp-home-v2";
+const CACHE = "gkp-home-v3";
 const FILES = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg"];
 
 self.addEventListener("install", e => {
